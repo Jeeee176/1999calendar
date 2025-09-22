@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1999 Historical Calendar</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #90d5ff ;
+      color: #0f172a;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 30px;
+      color: #1e293b;
+    }
+
+    #monthSelect {
+      display: block;
+      margin: 0 auto 20px;
+      padding: 10px 15px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background-color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      width: 250px;
+      text-align: center;
+    }
+
+    .calendar {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 24px;
+      margin-bottom: 30px;
+    }
+
+    .month-header {
+      text-align: center;
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #1e293b;
+    }
+
+    .weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px;
+      background-color: #e2e8f0;
+      margin-bottom: 1px;
+    }
+
+    .weekdays div {
+      padding: 12px 0;
+      text-align: center;
+      font-weight: 600;
+      background-color: #f1f5f9;
+      color: #475569;
+      font-size: 0.875rem;
+    }
+
+    .days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px;
+      min-height: 300px;
+    }
+
+    .day-cell {
+      height: 60px;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 4px;
+      font-size: 0.875rem;
+      cursor: default;
+      position: relative;
+      background-color: white;
+    }
+
+    .day-cell.empty {
+      background-color: #f8fafc;
+      cursor: default;
+    }
+
+    .day-number {
+      font-weight: 500;
+      margin-bottom: 2px;
+      color: #334155;
+    }
+
+    .event-title {
+      font-size: 0.75rem;
+      text-align: center;
+      line-height: 1.2;
+      margin-top: 2px;
+      color: #475569;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      width: 100%;
+    }
+
+    .day-cell.event {
+      cursor: pointer;
+      transition: box-shadow 0.2s, transform 0.1s;
+    }
+
+    .day-cell.event:hover {
+      box-shadow: inset 0 0 0 1px #3b82f6;
+      transform: translateY(-1px);
+    }
+
+    /* Event colors */
+    .event-blue {
+      background-color: #dbeafe;
+      border-color: #93c5fd;
+    }
+
+    .event-red {
+      background-color: #fee2e2;
+      border-color: #fca5a5;
+    }
+
+    .event-green {
+      background-color: #d1fae5;
+      border-color: #86efac;
+    }
+
+    .event-yellow {
+      background-color: #fef3c7;
+      border-color: #fde68a;
+    }
+
+    .event-purple {
+      background-color: #f3e8ff;
+      border-color: #d8b4fe;
+    }
+
+    .event-orange {
+      background-color: #fed7aa;
+      border-color: #fdba74;
+    }
+
+    .event-gray {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .legend {
+      background-color: #f8fafc;
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .legend h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #1e293b;
+    }
+
+    .legend-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+    }
+
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border: 1px solid #94a3b8;
+      margin-right: 8px;
+      border-radius: 2px;
+    }
+
+    .legend-color.blue { background-color: #dbeafe; border-color: #93c5fd; }
+    .legend-color.red { background-color: #fee2e2; border-color: #fca5a5; }
+    .legend-color.green { background-color: #d1fae5; border-color: #86efac; }
+    .legend-color.yellow { background-color: #fef3c7; border-color: #fde68a; }
+    .legend-color.purple { background-color: #f3e8ff; border-color: #d8b4fe; }
+    .legend-color.orange { background-color: #fed7aa; border-color: #fdba74; }
+    .legend-color.gray { background-color: #f1f5f9; border-color: #cbd5e1; }
+
+    .legend-text {
+      font-size: 0.875rem;
+      color: #475569;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 10px;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      .calendar {
+        padding: 16px;
+      }
+
+      .day-cell {
+        height: 50px;
+        padding: 2px;
+        font-size: 0.75rem;
+      }
+
+      .event-title {
+        font-size: 0.65rem;
+      }
+
+      .weekdays div {
+        padding: 8px 0;
+        font-size: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>1999 Historical Calendar</h1>
+    
+    <select id="monthSelect"></select>
+
+    <div class="calendar">
+      <div class="month-header" id="monthHeader"></div>
+      
+      <div class="weekdays">
+        <div>Sun</div>
+        <div>Mon</div>
+        <div>Tue</div>
+        <div>Wed</div>
+        <div>Thu</div>
+        <div>Fri</div>
+        <div>Sat</div>
+      </div>
+      
+      <div class="days" id="daysGrid"></div>
+    </div>
+
+    <div class="legend">
+      <h3>Legend</h3>
+      <div class="legend-grid">
+        <div class="legend-item"><div class="legend-color blue"></div><span class="legend-text">Political Events</span></div>
+        <div class="legend-item"><div class="legend-color red"></div><span class="legend-text">Tragedies</span></div>
+        <div class="legend-item"><div class="legend-color green"></div><span class="legend-text">Positive Events</span></div>
+        <div class="legend-item"><div class="legend-color yellow"></div><span class="legend-text">International</span></div>
+        <div class="legend-item"><div class="legend-color purple"></div><span class="legend-text">Cultural/Tech</span></div>
+        <div class="legend-item"><div class="legend-color orange"></div><span class="legend-text">Sports</span></div>
+        <div class="legend-item"><div class="legend-color gray"></div><span class="legend-text">Other</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const months = [
+      { name: "January 1999", days: 31, startDay: 5, events: [
+        { day: 1, title: "Euro launched", link: "https://en.wikipedia.org/wiki/Euro", color: "event-blue" },
+        { day: 20, title: "Clinton impeachment trial", link: "https://en.wikipedia.org/wiki/Impeachment_of_Bill_Clinton", color: "event-red" }
+      ]},
+      { name: "February 1999", days: 28, startDay: 1, events: [
+        { day: 12, title: "Clinton acquitted", link: "https://en.wikipedia.org/wiki/Impeachment_of_Bill_Clinton", color: "event-green" },
+        { day: 23, title: "Kurdish leader captured", link: "https://en.wikipedia.org/wiki/Abdullah_%C3%96calan", color: "event-yellow" }
+      ]},
+      { name: "March 1999", days: 31, startDay: 1, events: [
+        { day: 12, title: "NATO expansion", link: "https://en.wikipedia.org/wiki/NATO", color: "event-blue" },
+        { day: 24, title: "NATO bombs Yugoslavia", link: "https://en.wikipedia.org/wiki/NATO_bombing_of_Yugoslavia", color: "event-red" }
+      ]},
+      { name: "April 1999", days: 30, startDay: 4, events: [
+        { day: 20, title: "Columbine shooting", link: "https://en.wikipedia.org/wiki/Columbine_High_School_massacre", color: "event-red" },
+        { day: 23, title: "NATO summit", link: "https://en.wikipedia.org/wiki/1999_Washington_Summit", color: "event-blue" }
+      ]},
+      { name: "May 1999", days: 31, startDay: 6, events: [
+        { day: 7, title: "NATO bombs Chinese embassy", link: "https://en.wikipedia.org/wiki/United_States_bombing_of_the_Chinese_embassy_in_Belgrade", color: "event-yellow" },
+        { day: 19, title: "Star Wars: Episode I released", link: "https://en.wikipedia.org/wiki/Star_Wars:_Episode_I_%E2%80%93_The_Phantom_Menace", color: "event-purple" }
+      ]},
+      { name: "June 1999", days: 30, startDay: 2, events: [
+        { day: 10, title: "Kosovo War ends", link: "https://en.wikipedia.org/wiki/Kosovo_War", color: "event-green" },
+        { day: 18, title: "NBA Finals", link: "https://en.wikipedia.org/wiki/1999_NBA_Finals", color: "event-orange" }
+      ]},
+      { name: "July 1999", days: 31, startDay: 4, events: [
+        { day: 16, title: "JFK Jr. plane crash", link: "https://en.wikipedia.org/wiki/John_F._Kennedy_Jr._plane_crash", color: "event-gray" },
+        { day: 23, title: "Space Shuttle launch", link: "https://en.wikipedia.org/wiki/STS-93", color: "event-blue" }
+      ]},
+      { name: "August 1999", days: 31, startDay: 0, events: [
+        { day: 17, title: "Turkey earthquake", link: "https://en.wikipedia.org/wiki/1999_%C4%B0zmit_earthquake", color: "event-red" },
+        { day: 31, title: "Russia apartment bombings", link: "https://en.wikipedia.org/wiki/Russian_apartment_bombings", color: "event-yellow" }
+      ]},
+      { name: "September 1999", days: 30, startDay: 3, events: [
+        { day: 21, title: "Taiwan earthquake", link: "https://en.wikipedia.org/wiki/1999_Jiji_earthquake", color: "event-red" },
+        { day: 27, title: "Y2K preparation", link: "https://en.wikipedia.org/wiki/Year_2000_problem", color: "event-purple" }
+      ]},
+      { name: "October 1999", days: 31, startDay: 5, events: [
+        { day: 12, title: "World population reaches 6B", link: "https://en.wikipedia.org/wiki/World_population", color: "event-green" },
+        { day: 31, title: "EgyptAir Flight 990", link: "https://en.wikipedia.org/wiki/EgyptAir_Flight_990", color: "event-gray" }
+      ]},
+      { name: "November 1999", days: 30, startDay: 1, events: [
+        { day: 15, title: "WTO protests in Seattle", link: "https://en.wikipedia.org/wiki/1999_Seattle_WTO_protests", color: "event-yellow" },
+        { day: 20, title: "China launches Shenzhou", link: "https://en.wikipedia.org/wiki/Shenzhou_1", color: "event-blue" }
+      ]},
+      { name: "December 1999", days: 31, startDay: 3, events: [
+        { day: 14, title: "Panama Canal transfer", link: "https://en.wikipedia.org/wiki/Panama_Canal", color: "event-green" },
+        { day: 31, title: "Y2K New Year", link: "https://en.wikipedia.org/wiki/Year_2000_problem", color: "event-purple" }
+        
+      ]}
+    ];
+
+    const monthSelect = document.getElementById('monthSelect');
+    const monthHeader = document.getElementById('monthHeader');
+    const daysGrid = document.getElementById('daysGrid');
+
+    // Populate dropdown
+    months.forEach((month, index) => {
+      const option = document.createElement('option');
+      option.value = index;
+      option.textContent = month.name;
+      monthSelect.appendChild(option);
+    });
+
+    // Render calendar
+    function renderCalendar(monthIndex) {
+      const month = months[monthIndex];
+      monthHeader.textContent = month.name;
+      daysGrid.innerHTML = '';
+
+      // Empty cells before start day
+      for (let i = 0; i < month.startDay; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'day-cell empty';
+        daysGrid.appendChild(emptyCell);
+      }
+
+      // Days
+      for (let day = 1; day <= month.days; day++) {
+        const dayCell = document.createElement('div');
+        dayCell.className = 'day-cell';
+
+        const dayNumber = document.createElement('div');
+        dayNumber.className = 'day-number';
+        dayNumber.textContent = day;
+        dayCell.appendChild(dayNumber);
+
+        const event = month.events.find(e => e.day === day);
+        if (event) {
+          dayCell.classList.add('event', event.color);
+
+          const eventTitle = document.createElement('div');
+          eventTitle.className = 'event-title';
+          eventTitle.textContent = event.title;
+          dayCell.appendChild(eventTitle);
+
+          dayCell.addEventListener('click', () => {
+            window.open(event.link, '_blank');
+          });
+        }
+
+        daysGrid.appendChild(dayCell);
+      }
+    }
+
+    // Default load January
+    monthSelect.value = 0;
+    renderCalendar(0);
+
+    // Change month on selection
+    monthSelect.addEventListener('change', (e) => {
+      renderCalendar(e.target.value);
+    });
+  </script>
+</body>
+</html>
